@@ -1,3 +1,3 @@
 [workspace]
-members=["delegated-proof-of-stake", "merkle-whitelist-token-sale","spl-staking"]
+members=[ "ai-depin-settlement","delegated-proof-of-stake", "merkle-whitelist-token-sale","spl-staking"]
 resolver="2"
