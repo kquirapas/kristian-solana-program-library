@@ -1,0 +1,3 @@
+[workspace]
+members=["delegated-proof-of-stake", "merkle-whitelist-token-sale","spl-staking"]
+resolver="2"
