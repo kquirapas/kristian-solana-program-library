@@ -87,7 +87,7 @@ pub enum TokenSaleInstruction {
         /// Amount of tokens allowed per buyer wallet
         purchase_limit: u64,
         /// Merkle tree root of whitelist
-        whitelist_root: [u8; 32],
+        whitelist_root: WhitelistRoot,
     },
 
     /// Close the token sale

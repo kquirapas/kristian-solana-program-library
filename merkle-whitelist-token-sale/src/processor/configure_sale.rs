@@ -1,4 +1,5 @@
 use crate::error::TokenSaleError;
+use crate::merkle::WhitelistRoot;
 use crate::pda::find_token_base_pda;
 use crate::state::TokenBase;
 use crate::{
@@ -29,7 +30,7 @@ pub fn process_configure_sale(
     ctx: Context<ConfigureSaleAccounts>,
     price: u64,
     purchase_limit: u64,
-    whitelist_root: [u8; 32],
+    whitelist_root: WhitelistRoot,
 ) -> ProgramResult {
     //---------- Account Validations ----------
 

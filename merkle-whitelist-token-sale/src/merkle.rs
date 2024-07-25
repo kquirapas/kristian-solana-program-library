@@ -24,7 +24,7 @@ pub struct WhitelistNode {
 }
 
 /// borsh de/serializable Merkle Root primitive
-#[derive(BorshSerialize, BorshDeserialize, Debug)]
+#[derive(BorshSerialize, BorshDeserialize, Clone, Debug)]
 pub struct WhitelistRoot(pub Root);
 
 /// Verify membership

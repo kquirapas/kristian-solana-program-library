@@ -1,5 +1,7 @@
-use crate::merkle::WhitelistProof;
-use crate::merkle::{convert_whitelist_proof, pubkey_to_sha256_leaf, verify_membership};
+use crate::merkle::{
+    convert_whitelist_proof, pubkey_to_sha256_leaf, verify_membership, WhitelistProof,
+    WhitelistRoot,
+};
 use borsh::{BorshDeserialize, BorshSerialize};
 use shank::ShankAccount;
 use solana_program::{program_error::ProgramError, pubkey::Pubkey};
@@ -25,7 +27,7 @@ pub struct TokenBase {
     pub vault: Pubkey,
     /// Merkle root hash used to verify passed Merkle proof
     /// for whitelist gating
-    pub whitelist_root: [u8; 32],
+    pub whitelist_root: WhitelistRoot, // [u8; 32]
     /// Identifier for this specific structure
     pub discriminator: [u8; 8],
     /// Amount of lamports to transfer from Buyer to Vault 
@@ -64,6 +66,10 @@ impl TokenBase {
     ) -> Result<bool, ProgramError> {
         let member = pubkey_to_sha256_leaf(buyer);
         let merkle_proof = convert_whitelist_proof(proof);
-        Ok(verify_membership(self.whitelist_root, merkle_proof, member))
+        Ok(verify_membership(
+            self.whitelist_root.0,
+            merkle_proof,
+            member,
+        ))
     }
 }

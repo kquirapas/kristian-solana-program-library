@@ -48,7 +48,7 @@ pub fn process_open_sale(
     // - token_base seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
 
     // - account is uninitialized
-    let token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
+    let token_base_data = ctx.accounts.token_base.try_borrow_data()?;
     require!(
         token_base_data.len() == 0,
         ProgramError::AccountAlreadyInitialized,
@@ -164,7 +164,7 @@ pub fn process_open_sale(
     token_base.mint = *mint.key;
     token_base.vault = *vault.key;
     token_base.sale_authority = *sale_authority.key;
-    // token_base.whitelist_root = whitelist_root;
+    token_base.whitelist_root = whitelist_root;
     token_base.price = price;
     token_base.default_purchase_limit = purchase_limit;
     token_base.bump = token_base_bump; // store canonical bump
