@@ -1,14 +1,13 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+#![forbid(unsafe_code)]
+pub mod entrypoint;
+pub mod error;
+pub mod instruction;
+pub mod macros;
+pub mod merkle;
+pub mod pda;
+pub mod processor;
+pub mod state;
+pub mod test;
+pub mod wasm;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}
+solana_program::declare_id!("Aq2EAZ8i8UgKGaGzpSPhfvGxf4hkziymA4WqXrJ4NYu4");

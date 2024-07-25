@@ -1,0 +1,460 @@
+{
+  "version": "0.1.0",
+  "name": "merkle_whitelist_token_sale",
+  "instructions": [
+    {
+      "name": "OpenSale",
+      "accounts": [
+        {
+          "name": "tokenBase",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account for holding the mint details of the token being sold"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account for holding the funds raised from token sale"
+          ]
+        },
+        {
+          "name": "saleAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Account who has authority to manage the token sale"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System Program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "purchaseLimit",
+          "type": "u64"
+        },
+        {
+          "name": "whitelistRoot",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 0
+      }
+    },
+    {
+      "name": "ConfigureSale",
+      "accounts": [
+        {
+          "name": "tokenBase",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account for holding the mint details of the token being sold"
+          ]
+        },
+        {
+          "name": "newVault",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account for holding the funds raised from token sale"
+          ]
+        },
+        {
+          "name": "saleAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Account who has authority to manage the token sale"
+          ]
+        },
+        {
+          "name": "rentSysvar",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Rent Sysvar"
+          ]
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "System Program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "price",
+          "type": "u64"
+        },
+        {
+          "name": "purchaseLimit",
+          "type": "u64"
+        },
+        {
+          "name": "whitelistRoot",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 1
+      }
+    },
+    {
+      "name": "CloseSale",
+      "accounts": [
+        {
+          "name": "tokenBase",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+          ]
+        },
+        {
+          "name": "saleAuthority",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Account who has authority to manage the token sale"
+          ]
+        }
+      ],
+      "args": [],
+      "discriminant": {
+        "type": "u8",
+        "value": 2
+      }
+    },
+    {
+      "name": "BuyToken",
+      "accounts": [
+        {
+          "name": "tokenBase",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+          ]
+        },
+        {
+          "name": "mint",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account for holding the mint details of the token being sold"
+          ]
+        },
+        {
+          "name": "vault",
+          "isMut": true,
+          "isSigner": false,
+          "docs": [
+            "Account for holding the funds raised from token sale"
+          ]
+        },
+        {
+          "name": "saleAuthority",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account who has authority to manage the token sale"
+          ]
+        },
+        {
+          "name": "buyerTokenAccount",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account owned by the buyer where newly bought tokens get transferred to"
+          ]
+        },
+        {
+          "name": "buyerFacts",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Account (BuyerFacts PDA) holding user specific statistics. Seeds ['buyer_facts', `pubkey(buyer)`, `pubkey(mint)`]"
+          ]
+        },
+        {
+          "name": "buyer",
+          "isMut": false,
+          "isSigner": true,
+          "docs": [
+            "Account who is buying from token sale and will pay for the fees"
+          ]
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false,
+          "docs": [
+            "Official SPL Token Program"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "proof",
+          "type": {
+            "defined": "WhitelistProof"
+          }
+        }
+      ],
+      "discriminant": {
+        "type": "u8",
+        "value": 3
+      }
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BuyerFacts",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "tokenAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "discriminator",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "purchaseLimit",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                17
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenBase",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "saleAuthority",
+            "type": "publicKey"
+          },
+          {
+            "name": "mint",
+            "type": "publicKey"
+          },
+          {
+            "name": "vault",
+            "type": "publicKey"
+          },
+          {
+            "name": "whitelistRoot",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "discriminator",
+            "type": {
+              "array": [
+                "u8",
+                8
+              ]
+            }
+          },
+          {
+            "name": "price",
+            "type": "u64"
+          },
+          {
+            "name": "defaultPurchaseLimit",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "padding",
+            "type": {
+              "array": [
+                "u8",
+                7
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "WhitelistNode",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "data",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "side",
+            "type": {
+              "defined": "WhitelistSide"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "WhitelistSide",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "LEFT"
+          },
+          {
+            "name": "RIGHT"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 0,
+      "name": "InvalidAccountDataLength",
+      "msg": "Invalid account data length"
+    },
+    {
+      "code": 1,
+      "name": "MintAndSaleAuthorityMismatch",
+      "msg": "Mint and Sale authority don't match"
+    },
+    {
+      "code": 2,
+      "name": "MustBeNonExecutable",
+      "msg": "Account must be non-executable"
+    },
+    {
+      "code": 3,
+      "name": "SaleAuthorityNotSigner",
+      "msg": "Sale authority not a signer"
+    },
+    {
+      "code": 4,
+      "name": "UnexpectedPDASeeds",
+      "msg": "Unexpected PDA seeds"
+    },
+    {
+      "code": 5,
+      "name": "AccountUninitialized",
+      "msg": "Account not yet initialized"
+    },
+    {
+      "code": 6,
+      "name": "FailedToDecodeSha256Hash",
+      "msg": "Failed to decode hash"
+    },
+    {
+      "code": 7,
+      "name": "InvalidTokenProgramID",
+      "msg": "Invalid SPL Token Program"
+    },
+    {
+      "code": 8,
+      "name": "AccountsAndTokenBaseMismatch",
+      "msg": "Mint and Sale authority don't match"
+    },
+    {
+      "code": 9,
+      "name": "NotWhitelisted",
+      "msg": "Not whitelisted"
+    },
+    {
+      "code": 10,
+      "name": "IncompatibleProof",
+      "msg": "Incompatible Proof Format"
+    }
+  ],
+  "metadata": {
+    "origin": "shank",
+    "address": "Aq2EAZ8i8UgKGaGzpSPhfvGxf4hkziymA4WqXrJ4NYu4"
+  }
+}
