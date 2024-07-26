@@ -33,15 +33,19 @@ pub struct TokenBase {
     /// Amount of lamports to transfer from Buyer to Vault 
     /// when purchasing tokens
     pub price: u64,
-    /// Default purchase limit per user can be changed
+    /// Purchase limit set per user upon RegisterBuyer
+    /// 
+    /// Purchase limit per user can be changed
     /// per wallet via AssignLimit
     pub default_purchase_limit: u64,
+    /// Determines if the sale is already open for buyers
+    pub is_running: bool,
     /// Canonical bump for TokenBase PDA
     pub bump: u8,
 
     /// Padding to remove SLOP in C memory layout alignment
     /// Widest scalar = 32bytes
-    _padding: [u8; 7]
+    _padding: [u8; 6]
 }
 
 impl TokenBase {

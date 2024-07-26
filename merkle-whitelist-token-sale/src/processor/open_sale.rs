@@ -1,23 +1,23 @@
 use crate::error::TokenSaleError;
 use crate::merkle::WhitelistRoot;
-use crate::pda::find_token_base_pda;
+use crate::pda::TokenBasePDA;
 use crate::state::TokenBase;
 use crate::{
     instruction::accounts::{Context, OpenSaleAccounts},
     require,
 };
-use borsh::BorshDeserialize;
+use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
-    entrypoint::ProgramResult, msg, program::invoke_signed, program_error::ProgramError,
+    entrypoint::ProgramResult, program::invoke_signed, program_error::ProgramError,
     program_pack::Pack, pubkey::Pubkey, rent::Rent, system_instruction,
     system_program::ID as SYSTEM_PROGRAM_ID, sysvar::Sysvar,
 };
+use spl_discriminator::SplDiscriminate;
 use spl_token::{error::TokenError, state::Mint};
 
 /// Open a Token Sale with the given config
 ///
-/// Validates the accounts and data passed then
-/// initializes the [`TokenBase`] (config)
+/// Initializes the [`TokenBase`] PDA account (config)
 ///
 /// Accounts
 /// 0. `[WRITE]`    `Token Base` config account, PDA generated offchain
@@ -57,7 +57,7 @@ pub fn process_open_sale(
     drop(token_base_data);
 
     // - token_base seeds must be ["token_base", pubkey(mint)]
-    let (token_base_pda, token_base_bump) = find_token_base_pda(
+    let (token_base_pda, token_base_bump) = TokenBasePDA::find_pda(
         program_id,
         ctx.accounts.sale_authority.key,
         ctx.accounts.mint.key,
@@ -151,23 +151,29 @@ pub fn process_open_sale(
             ctx.accounts.token_base.clone(),
         ],
         &[&[
-            b"token_base",
+            TokenBasePDA::NAME.as_bytes(),
             ctx.accounts.sale_authority.key.as_ref(),
             ctx.accounts.mint.key.as_ref(),
             &[token_base_bump],
         ]],
     )?;
 
-    let token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
+    let mut token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
     let mut token_base = TokenBase::try_from_slice(&token_base_data)?;
 
+    // update values
+    token_base.discriminator = TokenBase::SPL_DISCRIMINATOR.into();
     token_base.mint = *mint.key;
     token_base.vault = *vault.key;
     token_base.sale_authority = *sale_authority.key;
     token_base.whitelist_root = whitelist_root;
     token_base.price = price;
     token_base.default_purchase_limit = purchase_limit;
+    token_base.is_running = false;
     token_base.bump = token_base_bump; // store canonical bump
+
+    // store new values
+    token_base.serialize(&mut &mut token_base_data[..]).unwrap();
 
     Ok(())
 }

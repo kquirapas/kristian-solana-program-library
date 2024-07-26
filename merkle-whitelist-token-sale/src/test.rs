@@ -28,6 +28,7 @@ mod tests {
             sysvar::rent::ID as RENT_SYSVAR_ID,
             transaction::Transaction,
         },
+        spl_discriminator::discriminator::ArrayDiscriminator,
     };
 
     #[tokio::test]
@@ -79,17 +80,18 @@ mod tests {
         banks_client.process_transaction(transaction).await.unwrap();
 
         // create token_base
-        let (token_base_pda, _) =
-            pda::find_token_base_pda(&program_id, &payer.pubkey(), &mint.pubkey());
+        let (token_base_pda, token_base_canonical_bump) =
+            pda::TokenBasePDA::find_pda(&program_id, &payer.pubkey(), &mint.pubkey());
 
         let vault = Keypair::new();
 
         let price: u64 = 100000000000;
         let default_purchase_limit: u64 = 100;
+        let whitelist_root = crate::merkle::WhitelistRoot(MerkleTree::new(Vec::new()).root);
         let instruction = crate::instruction::TokenSaleInstruction::OpenSale {
             price,
             purchase_limit: default_purchase_limit,
-            whitelist_root: crate::merkle::WhitelistRoot(MerkleTree::new(Vec::new()).root),
+            whitelist_root: whitelist_root.clone(),
         };
 
         let mut instruction_data = Vec::new();
@@ -114,7 +116,21 @@ mod tests {
 
         banks_client.process_transaction(transaction).await.unwrap();
 
+        // confirm state
+        let token_base = banks_client
+            .get_account_data_with_borsh::<state::TokenBase>(token_base_pda)
+            .await
+            .unwrap();
+
         // instruction went through
-        assert_eq!(true, true);
+        assert_eq!(token_base.sale_authority, payer.pubkey());
+        assert_eq!(token_base.mint, mint.pubkey());
+        assert_eq!(token_base.vault, vault.pubkey());
+        assert_eq!(token_base.whitelist_root.0, whitelist_root.0);
+        assert_eq!(token_base.price, price);
+        assert_eq!(token_base.default_purchase_limit, default_purchase_limit);
+        assert_eq!(token_base.bump, token_base_canonical_bump);
+        assert!(!token_base.is_running);
+        assert!(token_base.discriminator != ArrayDiscriminator::UNINITIALIZED.as_slice());
     }
 }

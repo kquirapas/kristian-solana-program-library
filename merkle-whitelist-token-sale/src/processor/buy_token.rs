@@ -1,6 +1,6 @@
 use crate::error::TokenSaleError;
 use crate::merkle::WhitelistProof;
-use crate::pda::{find_buyer_facts_pda, find_token_base_pda};
+use crate::pda::{BuyerFactsPDA, TokenBasePDA};
 use crate::state::{BuyerFacts, TokenBase};
 use crate::{
     instruction::accounts::{BuyTokenAccounts, Context},
