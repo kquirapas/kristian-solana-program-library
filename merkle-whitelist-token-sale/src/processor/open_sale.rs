@@ -8,7 +8,7 @@ use crate::{
 };
 use borsh::BorshDeserialize;
 use solana_program::{
-    entrypoint::ProgramResult, program::invoke_signed, program_error::ProgramError,
+    entrypoint::ProgramResult, msg, program::invoke_signed, program_error::ProgramError,
     program_pack::Pack, pubkey::Pubkey, rent::Rent, system_instruction,
     system_program::ID as SYSTEM_PROGRAM_ID, sysvar::Sysvar,
 };
