@@ -2,7 +2,7 @@ use super::ConfigureSaleAccounts;
 use crate::error::TokenSaleError;
 use crate::merkle::WhitelistRoot;
 use crate::pda::TokenBasePDA;
-use crate::state::{self, TokenBase};
+use crate::state::TokenBase;
 use crate::{instruction::accounts::*, require};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
@@ -28,7 +28,7 @@ use spl_token::{error::TokenError, state::Mint};
 /// - whitelist_root: Option<WhitelistRoot>,
 ///
 /// Data Validations
-/// - (None)
+/// - at least one of price, purchase_limit, and whitelist_root is Some()
 pub fn process_configure_sale(
     program_id: &Pubkey,
     ctx: Context<ConfigureSaleAccounts>,
@@ -41,16 +41,16 @@ pub fn process_configure_sale(
     // 0. token_base
     //
     // - account is initialized
-    // - token_base seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
+    // - seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
 
     // - account is initialized
-    let token_base_data = ctx.accounts.token_base.try_borrow_data()?;
+    let mut token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
+    let mut token_base = TokenBase::try_from_slice(&token_base_data)?;
     require!(
-        token_base_data.len() == state::TokenBase::LEN,
+        token_base.is_initialized(),
         ProgramError::UninitializedAccount,
         "token_base"
     );
-    drop(token_base_data);
 
     // - token_base seeds must be ["token_base", pubkey(mint)]
     let (token_base_pda, _) = TokenBasePDA::find_pda(
@@ -102,7 +102,7 @@ pub fn process_configure_sale(
     // - must be signer
     require!(
         sale_authority.is_signer,
-        TokenSaleError::SaleAuthorityNotSigner,
+        TokenSaleError::NeedSigner,
         "sale_authority"
     );
 
@@ -113,8 +113,6 @@ pub fn process_configure_sale(
     assert!(price.is_some() || default_purchase_limit.is_some() || whitelist_root.is_some());
 
     //---------- Executing Instruction ----------
-    let mut token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
-    let mut token_base = TokenBase::try_from_slice(&token_base_data)?;
 
     // configure sale
 

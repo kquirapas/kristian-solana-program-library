@@ -100,4 +100,43 @@ impl TestHelper {
 
         (token_base_pda, token_base_canonical_bump)
     }
+
+    pub async fn initialize_buyer_facts(
+        token_base: Pubkey,
+        buyer: Pubkey,
+        program_id: Pubkey,
+        ctx: &mut ProgramTestContext,
+    ) -> (Pubkey, u8) {
+        // create buyer_facts
+        let (buyer_facts_pda, buyer_facts_canonical_bump) =
+            pda::BuyerFactsPDA::find_pda(&program_id, &token_base, &buyer);
+
+        let instruction = crate::instruction::TokenSaleInstruction::RegisterBuyer;
+
+        let mut instruction_data = Vec::new();
+        instruction.serialize(&mut instruction_data).unwrap();
+
+        let transaction = Transaction::new_signed_with_payer(
+            &[Instruction {
+                program_id,
+                accounts: vec![
+                    AccountMeta::new_readonly(token_base, false),
+                    AccountMeta::new(buyer_facts_pda, false),
+                    AccountMeta::new(ctx.payer.pubkey(), true),
+                    AccountMeta::new_readonly(SYSTEM_PROGRAM_ID, false),
+                ],
+                data: instruction_data,
+            }],
+            Some(&ctx.payer.pubkey()),
+            &[&ctx.payer.insecure_clone()],
+            ctx.last_blockhash,
+        );
+
+        ctx.banks_client
+            .process_transaction(transaction)
+            .await
+            .unwrap();
+
+        (buyer_facts_pda, buyer_facts_canonical_bump)
+    }
 }

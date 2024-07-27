@@ -118,7 +118,7 @@ pub fn process_open_sale(
     // - must be signer
     require!(
         sale_authority.is_signer,
-        TokenSaleError::SaleAuthorityNotSigner,
+        TokenSaleError::NeedSigner,
         "sale_authority"
     );
 

@@ -1,7 +1,7 @@
 use super::ToggleRunningAccounts;
 use crate::error::TokenSaleError;
 use crate::pda::TokenBasePDA;
-use crate::state::{self, TokenBase};
+use crate::state::TokenBase;
 use crate::{instruction::accounts::*, require};
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
@@ -33,13 +33,13 @@ pub fn process_update_running(
     // - token_base seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
 
     // - account is initialized
-    let token_base_data = ctx.accounts.token_base.try_borrow_data()?;
+    let mut token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
+    let mut token_base = TokenBase::try_from_slice(&token_base_data)?;
     require!(
-        token_base_data.len() == state::TokenBase::LEN,
+        token_base.is_initialized(),
         ProgramError::UninitializedAccount,
         "token_base"
     );
-    drop(token_base_data);
 
     // - token_base seeds must be ["token_base", pubkey(mint)]
     let (token_base_pda, _) = TokenBasePDA::find_pda(
@@ -91,16 +91,13 @@ pub fn process_update_running(
     // - must be signer
     require!(
         sale_authority.is_signer,
-        TokenSaleError::SaleAuthorityNotSigner,
+        TokenSaleError::NeedSigner,
         "sale_authority"
     );
 
     //---------- Data Validations (if any) ----------
 
     //---------- Executing Instruction ----------
-    let mut token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
-    let mut token_base = TokenBase::try_from_slice(&token_base_data)?;
-
     // update is_running
     token_base.is_running = !token_base.is_running;
 

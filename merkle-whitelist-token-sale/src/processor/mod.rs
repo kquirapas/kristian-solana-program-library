@@ -14,6 +14,12 @@ use configure_sale::*;
 pub mod close_sale;
 use close_sale::*;
 
+pub mod assign_limit;
+use assign_limit::*;
+
+pub mod register_buyer;
+use register_buyer::*;
+
 // pub mod buy_token;
 // use buy_token::*;
 
@@ -67,6 +73,18 @@ impl<'a> Processor {
 
             TokenSaleInstruction::CloseSale => {
                 process_close_sale(program_id, CloseSaleAccounts::context(accounts)?)?;
+            }
+
+            TokenSaleInstruction::AssignLimit { new_purchase_limit } => {
+                process_assign_limit(
+                    program_id,
+                    AssignLimitAccounts::context(accounts)?,
+                    new_purchase_limit,
+                )?;
+            }
+
+            TokenSaleInstruction::RegisterBuyer => {
+                process_register_buyer(program_id, RegisterBuyerAccounts::context(accounts)?)?;
             }
         }
 

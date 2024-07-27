@@ -17,3 +17,6 @@ TokenSale Instruction List
 - BuyToken
 - CloseFacts
 
+
+## TODO
+- Remove extra / repeated validations (If any)

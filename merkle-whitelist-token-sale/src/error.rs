@@ -17,8 +17,8 @@ pub enum TokenSaleError {
     #[error("Account must be non-executable")]
     MustBeNonExecutable, // 2
 
-    #[error("Sale authority not a signer")]
-    SaleAuthorityNotSigner, // 3
+    #[error("Not a signer")]
+    NeedSigner, // 3
 
     #[error("Unexpected PDA seeds")]
     UnexpectedPDASeeds, // 4

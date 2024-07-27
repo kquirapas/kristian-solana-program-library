@@ -11,3 +11,6 @@ A small subset of Solana programs I've written that I have full liberty to publi
 | NFT Marketplace                  |             | Not Yet  | Not Yet | Not Yet | Not Yet |
 | SPL Staking                      |             | Not Yet  | Not Yet | Not Yet | Not Yet |
 | Delegated Proof of Stake         |             | Not Yet  | Not Yet | Not Yet | Not Yet |
+| Futarchy DAO                     |             | Not Yet  | Not Yet | Not Yet | Not Yet |
+| Liquid Staking                   |             | Not Yet  | Not Yet | Not Yet | Not Yet |
+| Liquid Restaking                 |             | Not Yet  | Not Yet | Not Yet | Not Yet |

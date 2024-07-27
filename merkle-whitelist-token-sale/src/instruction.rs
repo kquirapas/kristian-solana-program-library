@@ -1,4 +1,4 @@
-use crate::merkle::{WhitelistProof, WhitelistRoot};
+use crate::merkle::WhitelistRoot;
 use borsh::{BorshDeserialize, BorshSerialize};
 use shank::{ShankContext, ShankInstruction};
 
@@ -12,7 +12,7 @@ use shank::{ShankContext, ShankInstruction};
 /// - AssignLimit
 ///
 /// For Buyer:
-/// - RegisterUser (Initialize)
+/// - RegisterBuyer (Initialize)
 /// - BuyToken
 /// - CloseFacts
 ///
@@ -20,7 +20,9 @@ use shank::{ShankContext, ShankInstruction};
 pub enum TokenSaleInstruction {
     /// Open a Token Sale with the given config
     ///
-    /// Initializes the [`TokenBase`] PDA account (config)
+    /// - Initializes the [`TokenBase`] PDA account (config)
+    ///
+    /// For Token Sale Authority
     #[account(
         0,
         writable,
@@ -62,7 +64,7 @@ pub enum TokenSaleInstruction {
         0,
         writable,
         name = "token_base",
-        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
     )]
     #[account(
         1,
@@ -87,7 +89,7 @@ pub enum TokenSaleInstruction {
         0,
         writable,
         name = "token_base",
-        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
     )]
     #[account(
         1,
@@ -105,6 +107,7 @@ pub enum TokenSaleInstruction {
         default_purchase_limit: Option<u64>,
         whitelist_root: Option<WhitelistRoot>,
     },
+
     /// Close the token sale
     ///
     /// - Closes the [`TokenBase`] account
@@ -115,7 +118,7 @@ pub enum TokenSaleInstruction {
         0,
         writable,
         name = "token_base",
-        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', pubkey(sale_authority), pubkey(mint)]"
     )]
     #[account(
         1,
@@ -129,7 +132,61 @@ pub enum TokenSaleInstruction {
         desc = "Account who has authority to manage the token sale"
     )]
     CloseSale,
-    //
+
+    /// Assign a user's purchase limit
+    ///
+    /// - Changes the `purchase_limit` of a certain buyer's
+    /// BuyerFacts
+    ///
+    /// For Token Sale Authority
+    #[account(
+        0,
+        name = "token_base",
+        desc = "Account (BuyerFacts PDA) holding a buyer's configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
+    )]
+    #[account(
+        1,
+        writable,
+        name = "buyer_facts",
+        desc = "Account (BuyerFacts PDA) holding a buyer's configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
+    )]
+    #[account(
+        2,
+        name = "buyer",
+        desc = "Account who owns the BuyerFacts PDA to be assigned a new purchase limit to"
+    )]
+    #[account(
+        3,
+        signer,
+        name = "sale_authority",
+        desc = "Account who has authority to manage the token sale"
+    )]
+    AssignLimit { new_purchase_limit: u64 },
+
+    /// Register as a Buyer
+    ///
+    /// - Generates the buyer's BuyerFacts
+    ///
+    /// For Buyer
+    #[account(
+        0,
+        name = "token_base",
+        desc = "Account (BuyerFacts PDA) holding a buyer's configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
+    )]
+    #[account(
+        1,
+        writable,
+        name = "buyer_facts",
+        desc = "Account (BuyerFacts PDA) holding a buyer's configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
+    )]
+    #[account(
+        2,
+        signer,
+        name = "buyer",
+        desc = "Account who owns the BuyerFacts PDA to be assigned a new purchase limit to"
+    )]
+    #[account(3, name = "system_program", desc = "System_program")]
+    RegisterBuyer,
     // /// Buy N amount of Tokens
     // ///
     // /// - Initializes Associated Token Account for Buyer

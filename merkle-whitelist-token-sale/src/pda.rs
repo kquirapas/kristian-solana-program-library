@@ -30,9 +30,9 @@ pub struct BuyerFactsPDA {}
 impl BuyerFactsPDA {
     pub const NAME: &'static str = "buyer_facts";
 
-    pub fn find_pda(program_id: &Pubkey, buyer: &Pubkey, mint: &Pubkey) -> (Pubkey, u8) {
+    pub fn find_pda(program_id: &Pubkey, token_base: &Pubkey, buyer: &Pubkey) -> (Pubkey, u8) {
         Pubkey::find_program_address(
-            &[Self::NAME.as_bytes(), buyer.as_ref(), mint.as_ref()],
+            &[Self::NAME.as_bytes(), token_base.as_ref(), buyer.as_ref()],
             program_id,
         )
     }

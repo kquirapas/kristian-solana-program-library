@@ -191,11 +191,7 @@ pub fn process_buy_token(
     );
 
     // - must be signer
-    require!(
-        buyer.is_signer,
-        TokenSaleError::SaleAuthorityNotSigner,
-        "buyer"
-    );
+    require!(buyer.is_signer, TokenSaleError::NeedSigner, "buyer");
 
     // 4. token_program
     //

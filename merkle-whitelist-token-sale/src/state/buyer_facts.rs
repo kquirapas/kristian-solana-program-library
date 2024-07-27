@@ -1,6 +1,5 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use shank::ShankAccount;
-use solana_program::pubkey::Pubkey;
 use spl_discriminator::{ArrayDiscriminator, SplDiscriminate};
 
 // OPT-OUT: didn't use #[seeds()] because ShankAccount seeds
@@ -15,8 +14,6 @@ use spl_discriminator::{ArrayDiscriminator, SplDiscriminate};
 #[discriminator_hash_input("token_sale::state::buyer_facts")]
 /// BuyerFacts holding per wallet buyer stats
 pub struct BuyerFacts {
-    /// Token account holding buyer's tokens
-    pub token_account: Pubkey,
     /// Identifier for this specific structure
     pub discriminator: [u8; 8],
     /// Amount of tokens allowed for this specific buyer
@@ -25,8 +22,8 @@ pub struct BuyerFacts {
     pub bump: u8,
 
     /// Padding to remove SLOP in C memory layout alignment
-    /// Widest scalar = 32bytes
-    _padding: [u8; 17]
+    /// Widest scalar = 8bytes
+    _padding: [u8; 7]
 }
 
 impl BuyerFacts {

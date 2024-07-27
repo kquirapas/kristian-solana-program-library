@@ -1,10 +1,9 @@
+use super::CloseSaleAccounts;
 use crate::error::TokenSaleError;
 use crate::pda::TokenBasePDA;
 use crate::state::TokenBase;
-use crate::{
-    instruction::accounts::{CloseSaleAccounts, Context},
-    require,
-};
+use crate::{instruction::accounts::*, require};
+use borsh::BorshDeserialize;
 use solana_program::{
     entrypoint::ProgramResult, program_error::ProgramError, program_pack::Pack, pubkey::Pubkey,
 };
@@ -31,13 +30,13 @@ pub fn process_close_sale(program_id: &Pubkey, ctx: Context<CloseSaleAccounts>) 
     // - token_base seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
 
     // - account is initialized
-    let token_base_data = ctx.accounts.token_base.try_borrow_data()?;
+    let mut token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
+    let token_base = TokenBase::try_from_slice(&token_base_data)?;
     require!(
-        token_base_data.len() == TokenBase::LEN,
+        token_base.is_initialized(),
         ProgramError::UninitializedAccount,
         "token_base"
     );
-    drop(token_base_data);
 
     // - token_base seeds must be ["token_base", pubkey(mint)]
     let (token_base_pda, _) = TokenBasePDA::find_pda(
@@ -89,7 +88,7 @@ pub fn process_close_sale(program_id: &Pubkey, ctx: Context<CloseSaleAccounts>) 
     // - must be signer
     require!(
         sale_authority.is_signer,
-        TokenSaleError::SaleAuthorityNotSigner,
+        TokenSaleError::NeedSigner,
         "sale_authority"
     );
 
@@ -117,7 +116,6 @@ pub fn process_close_sale(program_id: &Pubkey, ctx: Context<CloseSaleAccounts>) 
     **token_base_account_info.try_borrow_mut_lamports()? = 0;
 
     // - Closes the [`TokenBase`] account
-    let mut token_base_data = token_base_account_info.try_borrow_mut_data()?;
     // fill with 0s = no data
     token_base_data.fill(0);
 
