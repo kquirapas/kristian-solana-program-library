@@ -1,15 +1,19 @@
 # Instructions
 
-## For Token Sale Authority
+TokenSale Instruction List
 
-- OpenSale
+## Token Sale Authority Instructions
 
-- ConfigureSale
-
+- OpenSale (Initialize)
+- ToggleRunning
+- UpdateWhitelist
+- UpdatePrice
+- UpdateLimit
 - CloseSale
-
 - AssignLimit
 
-## For Buyer
-
+## Buyer Instructions
+- RegisterUser (Initialize)
 - BuyToken
+- CloseFacts
+

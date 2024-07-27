@@ -6,11 +6,9 @@ use shank::{ShankContext, ShankInstruction};
 ///
 /// For Token Sale Authority:
 /// - OpenSale (Initialize)
-/// - ToggleRunning
-/// - UpdateWhitelist
-/// - UpdatePrice
-/// - UpdateLimit
+/// - ConfigureSale
 /// - CloseSale
+/// - ToggleRunning
 /// - AssignLimit
 ///
 /// For Buyer:
@@ -55,10 +53,9 @@ pub enum TokenSaleInstruction {
         whitelist_root: WhitelistRoot,
     },
 
-    /// Configures TokenBase config for token sale
+    /// Start/Pause Token Sale
     ///
-    /// - Atomically updates your [`TokenBase`]:
-    /// vault, price, purchase_limit, whitelist_root
+    /// - Flips the value of [`TokenBase`] `.is_running` property
     ///
     /// For Token Sale Authority
     #[account(
@@ -79,25 +76,59 @@ pub enum TokenSaleInstruction {
         desc = "Account who has authority to manage the token sale"
     )]
     ToggleRunning,
-    // /// Close the token sale
-    // ///
-    // /// - Closes the [`TokenBase`] account
-    // /// - Relinquishes rent lamports
-    // ///
-    // /// For Token Sale Authority
-    // #[account(
-    //     0,
-    //     writable,
-    //     name = "token_base",
-    //     desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
-    // )]
-    // #[account(
-    //     1,
-    //     signer,
-    //     name = "sale_authority",
-    //     desc = "Account who has authority to manage the token sale"
-    // )]
-    // CloseSale,
+
+    /// Update your Token Sale configuration
+    ///
+    /// - Modifies one or more than from: price, default_purchase_limit, whitelist_root
+    /// of [`TokenBase`]
+    ///
+    /// For Token Sale Authority
+    #[account(
+        0,
+        writable,
+        name = "token_base",
+        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+    )]
+    #[account(
+        1,
+        name = "mint",
+        desc = "Account for holding the mint details of the token being sold"
+    )]
+    #[account(
+        2,
+        signer,
+        name = "sale_authority",
+        desc = "Account who has authority to manage the token sale"
+    )]
+    ConfigureSale {
+        price: Option<u64>,
+        default_purchase_limit: Option<u64>,
+        whitelist_root: Option<WhitelistRoot>,
+    },
+    /// Close the token sale
+    ///
+    /// - Closes the [`TokenBase`] account
+    /// - Relinquishes rent lamports
+    ///
+    /// For Token Sale Authority
+    #[account(
+        0,
+        writable,
+        name = "token_base",
+        desc = "Account (TokenBase PDA) holding token sale configuration. Seeds ['token_base', `token_base::mint`]"
+    )]
+    #[account(
+        1,
+        name = "mint",
+        desc = "Account for holding the mint details of the token being sold"
+    )]
+    #[account(
+        2,
+        signer,
+        name = "sale_authority",
+        desc = "Account who has authority to manage the token sale"
+    )]
+    CloseSale,
     //
     // /// Buy N amount of Tokens
     // ///

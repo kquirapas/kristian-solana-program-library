@@ -8,9 +8,12 @@ use open_sale::*;
 pub mod toggle_running;
 use toggle_running::*;
 
-// pub mod close_sale;
-// use close_sale::*;
-//
+pub mod configure_sale;
+use configure_sale::*;
+
+pub mod close_sale;
+use close_sale::*;
+
 // pub mod buy_token;
 // use buy_token::*;
 
@@ -46,18 +49,25 @@ impl<'a> Processor {
 
             TokenSaleInstruction::ToggleRunning => {
                 process_update_running(program_id, ToggleRunningAccounts::context(accounts)?)?;
-            } // TokenSaleInstruction::CloseSale => {
-              //     process_close_sale(program_id, CloseSaleAccounts::context(accounts)?)?;
-              // }
-              //
-              // TokenSaleInstruction::BuyToken { amount, proof } => {
-              //     process_buy_token(
-              //         program_id,
-              //         BuyTokenAccounts::context(accounts)?,
-              //         amount,
-              //         proof,
-              //     )?;
-              // }
+            }
+
+            TokenSaleInstruction::ConfigureSale {
+                price,
+                default_purchase_limit,
+                whitelist_root,
+            } => {
+                process_configure_sale(
+                    program_id,
+                    ConfigureSaleAccounts::context(accounts)?,
+                    price,
+                    default_purchase_limit,
+                    whitelist_root,
+                )?;
+            }
+
+            TokenSaleInstruction::CloseSale => {
+                process_close_sale(program_id, CloseSaleAccounts::context(accounts)?)?;
+            }
         }
 
         Ok(())

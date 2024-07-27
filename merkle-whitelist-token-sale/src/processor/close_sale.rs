@@ -1,12 +1,14 @@
 use crate::error::TokenSaleError;
-use crate::pda::find_token_base_pda;
+use crate::pda::TokenBasePDA;
 use crate::state::TokenBase;
 use crate::{
     instruction::accounts::{CloseSaleAccounts, Context},
     require,
 };
-use borsh::BorshDeserialize;
-use solana_program::{entrypoint::ProgramResult, program_error::ProgramError, pubkey::Pubkey};
+use solana_program::{
+    entrypoint::ProgramResult, program_error::ProgramError, program_pack::Pack, pubkey::Pubkey,
+};
+use spl_token::{error::TokenError, state::Mint};
 
 /// Close the token sale
 ///
@@ -15,7 +17,8 @@ use solana_program::{entrypoint::ProgramResult, program_error::ProgramError, pub
 ///
 /// Accounts
 /// 0. `[WRITE]`    `Token Base` config account, PDA generated offchain
-/// 1. `[SIGNER]`   `Sale Authority` account
+/// 1. `[]`         `Mint` account
+/// 2. `[SIGNER]`   `Sale Authority` account
 ///
 /// Instruction Data
 /// - (Empty, None, Nada! HAHAHA)
@@ -24,44 +27,53 @@ pub fn process_close_sale(program_id: &Pubkey, ctx: Context<CloseSaleAccounts>) 
 
     // 0. token_base
     //
-    // - owner is token_sale (this) program
-    // - correct allocation length (TokenBase::LEN)
     // - account is initialized
-    // - token_base seeds must be ["token_base", pubkey(mint)]
+    // - token_base seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
 
-    // - owner is token_sale (this) program
-    require!(
-        ctx.accounts.token_base.owner == program_id,
-        ProgramError::InvalidAccountOwner,
-        "token_base"
-    );
-
-    // - correct allocation length (TokenBase::LEN)
-    let token_base_data = ctx.accounts.token_base.try_borrow_mut_data()?;
+    // - account is initialized
+    let token_base_data = ctx.accounts.token_base.try_borrow_data()?;
     require!(
         token_base_data.len() == TokenBase::LEN,
-        TokenSaleError::InvalidAccountDataLength,
+        ProgramError::UninitializedAccount,
         "token_base"
     );
+    drop(token_base_data);
 
-    // - account is initialized
-    let token_base = TokenBase::try_from_slice(&token_base_data)?;
-    require!(
-        token_base.is_initialized(),
-        TokenSaleError::AccountUninitialized,
-        "token_base"
+    // - token_base seeds must be ["token_base", pubkey(mint)]
+    let (token_base_pda, _) = TokenBasePDA::find_pda(
+        program_id,
+        ctx.accounts.sale_authority.key,
+        ctx.accounts.mint.key,
     );
-
-    // - token_base seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
-    let (token_base_pda, _) =
-        find_token_base_pda(program_id, &token_base.sale_authority, &token_base.mint);
     require!(
         *ctx.accounts.token_base.key == token_base_pda,
-        TokenSaleError::UnexpectedPDASeeds,
+        ProgramError::InvalidSeeds,
         "token_base"
     );
 
-    // 1. sale_authority
+    // 1. mint
+    //
+    // - is_initialized is true
+    // - mint_authority is token_base sale_authority
+    let mint = ctx.accounts.mint;
+    let mint_data = mint.try_borrow_data()?;
+    let mint_state = Mint::unpack(&mint_data)?;
+
+    // - is_initialized is true
+    require!(
+        mint_state.is_initialized,
+        TokenError::UninitializedState,
+        "mint"
+    );
+
+    // - mint_authority is token_base sale_authority
+    require!(
+        mint_state.mint_authority.unwrap() == *ctx.accounts.sale_authority.key,
+        TokenSaleError::MintAndSaleAuthorityMismatch,
+        "mint"
+    );
+
+    // 2. sale_authority
     //
     // - not executable
     // - must be signer
@@ -106,6 +118,7 @@ pub fn process_close_sale(program_id: &Pubkey, ctx: Context<CloseSaleAccounts>) 
 
     // - Closes the [`TokenBase`] account
     let mut token_base_data = token_base_account_info.try_borrow_mut_data()?;
+    // fill with 0s = no data
     token_base_data.fill(0);
 
     Ok(())

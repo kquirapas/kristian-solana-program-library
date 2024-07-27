@@ -29,7 +29,7 @@ use spl_token::{error::TokenError, state::Mint};
 /// Instruction Data
 /// - price: u64,
 /// - purchase_limit: u64,
-/// - whitelist_root: [u8; 32],
+/// - whitelist_root: WhitelistRoot
 ///
 /// Data Validations
 /// -

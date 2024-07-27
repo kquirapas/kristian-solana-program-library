@@ -17,12 +17,10 @@ use spl_token::{error::TokenError, state::Mint};
 /// 2. `[SIGNER]`   `Sale Authority` account
 ///
 /// Instruction Data
-/// - price: u64,
-/// - purchase_limit: u64,
-/// - whitelist_root: [u8; 32],
+/// - (None)
 ///
 /// Data Validations
-/// -
+/// - (None)
 pub fn process_update_running(
     program_id: &Pubkey,
     ctx: Context<ToggleRunningAccounts>,
