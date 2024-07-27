@@ -225,7 +225,7 @@ async fn test_configure_dpl_only() {
         &[Instruction {
             program_id,
             accounts: vec![
-                AccountMeta::new(token_base_pda, false),
+                AccountMeta::new(token_base_pda, false),config
                 AccountMeta::new_readonly(mint, false),
                 AccountMeta::new(ctx.payer.pubkey(), true),
             ],
