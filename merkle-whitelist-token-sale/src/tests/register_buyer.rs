@@ -31,7 +31,7 @@ async fn test_register_buyer() {
     let whitelist_root = crate::merkle::WhitelistRoot(MerkleTree::new(Vec::new()).root);
 
     // create TokenBase
-    let (token_base_pda, token_base_canonical_bump) = TestHelper::initialize_token_base(
+    let (token_base_pda, _) = TestHelper::initialize_token_base(
         price,
         default_purchase_limit,
         mint,
