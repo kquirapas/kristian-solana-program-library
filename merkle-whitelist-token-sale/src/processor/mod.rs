@@ -5,8 +5,8 @@ use solana_program::{account_info::AccountInfo, entrypoint::ProgramResult, pubke
 pub mod open_sale;
 use open_sale::*;
 
-pub mod start_sale;
-use start_sale::*;
+pub mod toggle_running;
+use toggle_running::*;
 
 // pub mod close_sale;
 // use close_sale::*;
@@ -44,8 +44,8 @@ impl<'a> Processor {
                 )?;
             }
 
-            TokenSaleInstruction::StartSale => {
-                process_start_sale(program_id, StartSaleAccounts::context(accounts)?)?;
+            TokenSaleInstruction::ToggleRunning => {
+                process_update_running(program_id, ToggleRunningAccounts::context(accounts)?)?;
             } // TokenSaleInstruction::CloseSale => {
               //     process_close_sale(program_id, CloseSaleAccounts::context(accounts)?)?;
               // }

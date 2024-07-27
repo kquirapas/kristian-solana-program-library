@@ -6,7 +6,7 @@ use shank::{ShankContext, ShankInstruction};
 ///
 /// For Token Sale Authority:
 /// - OpenSale (Initialize)
-/// - StartSale
+/// - ToggleRunning
 /// - UpdateWhitelist
 /// - UpdatePrice
 /// - UpdateLimit
@@ -16,6 +16,7 @@ use shank::{ShankContext, ShankInstruction};
 /// For Buyer:
 /// - RegisterUser (Initialize)
 /// - BuyToken
+/// - CloseFacts
 ///
 #[derive(BorshDeserialize, BorshSerialize, Debug, ShankContext, ShankInstruction)]
 pub enum TokenSaleInstruction {
@@ -77,7 +78,7 @@ pub enum TokenSaleInstruction {
         name = "sale_authority",
         desc = "Account who has authority to manage the token sale"
     )]
-    StartSale,
+    ToggleRunning,
     // /// Close the token sale
     // ///
     // /// - Closes the [`TokenBase`] account
