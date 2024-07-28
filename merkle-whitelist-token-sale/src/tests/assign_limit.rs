@@ -44,13 +44,6 @@ async fn test_assign_limit() {
     )
     .await;
 
-    // REVIEW: Weird edge case wherein when I use
-    // a new Keypair generated for the `buyer` Signer
-    // it will throw InvalidSeed because of buyer_facts
-    // PDA inequality
-    //
-    // But it works with banks_client's `payer` pubkey
-
     let (buyer, buyer_facts_pda, _) =
         TestHelper::initialize_buyer_facts(token_base_pda, program_id, &mut ctx).await;
 
