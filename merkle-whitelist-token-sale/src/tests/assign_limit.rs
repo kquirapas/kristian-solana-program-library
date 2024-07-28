@@ -11,9 +11,8 @@ use solana_sdk::{
     transaction::Transaction,
 };
 
-/// Test Happy Path
-#[tokio::test]
-async fn test_toggle_running() {
+/// Test Happy Path #[tokio::test]
+async fn test_assign_limit() {
     let program_id = Pubkey::new_unique();
     let program_test = ProgramTest::new(
         // .so fixture is  retrieved from /target/deploy
@@ -44,14 +43,25 @@ async fn test_toggle_running() {
     )
     .await;
 
-    let buyer = Keypair::new();
-    let (buyer_facts_pda, _) =
-        TestHelper::initialize_buyer_facts(token_base_pda, buyer.pubkey(), program_id, &mut ctx)
-            .await;
+    // REVIEW: Weird edge case wherein when I use
+    // a new Keypair generated for the `buyer` Signer
+    // it will throw InvalidSeed because of buyer_facts
+    // PDA inequality
+    //
+    // But it works with banks_client's `payer` pubkey
+    //
+    // let buyer = Keypair::new();
+
+    let (buyer_facts_pda, _) = TestHelper::initialize_buyer_facts(
+        token_base_pda,
+        // buyer.pubkey(),
+        ctx.payer.pubkey(),
+        program_id,
+        &mut ctx,
+    )
+    .await;
 
     let new_purchase_limit: u64 = 143;
-
-    // ToggleRunning Instruction
     let instruction = crate::instruction::TokenSaleInstruction::AssignLimit { new_purchase_limit };
 
     let mut instruction_data = Vec::new();
@@ -61,9 +71,9 @@ async fn test_toggle_running() {
         &[Instruction {
             program_id,
             accounts: vec![
-                AccountMeta::new(token_base_pda, false),
+                AccountMeta::new_readonly(token_base_pda, false),
                 AccountMeta::new(buyer_facts_pda, false),
-                AccountMeta::new_readonly(buyer.pubkey(), false),
+                AccountMeta::new_readonly(ctx.payer.pubkey(), false),
                 AccountMeta::new(ctx.payer.pubkey(), true),
             ],
             data: instruction_data.clone(),

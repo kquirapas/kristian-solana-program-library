@@ -4,7 +4,7 @@ use crate::pda::BuyerFactsPDA;
 use crate::state::BuyerFacts;
 use crate::{instruction::accounts::*, require};
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{entrypoint::ProgramResult, program_error::ProgramError, pubkey::Pubkey};
+use solana_program::{entrypoint::ProgramResult, msg, program_error::ProgramError, pubkey::Pubkey};
 
 /// Assign a user's purchase limit
 ///
@@ -14,8 +14,9 @@ use solana_program::{entrypoint::ProgramResult, program_error::ProgramError, pub
 /// For Token Sale Authority
 ///
 /// Accounts
+/// 1. `[]`         `Token Base` buyer config account, PDA generated offchain
 /// 0. `[WRITE]`    `Buyer Facts` buyer config account, PDA generated offchain
-/// 1. `[]`         `Mint` account
+/// 1. `[]`         `Buyer` account
 /// 2. `[SIGNER]`   `Sale Authority` account
 ///
 /// Instruction Data
@@ -44,7 +45,7 @@ pub fn process_assign_limit(
         "buyer_facts"
     );
 
-    // - buyer_facts seeds must be ["token_base", pubkey(buyer), pubkey(mint)]
+    // - buyer_facts seeds must be ["buyer_facts", pubkey(token_base), pubkey(buyer)]
     let (buyer_facts_pda, _) = BuyerFactsPDA::find_pda(
         program_id,
         ctx.accounts.token_base.key,
