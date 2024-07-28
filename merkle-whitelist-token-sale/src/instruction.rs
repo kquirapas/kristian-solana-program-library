@@ -14,7 +14,7 @@ use shank::{ShankContext, ShankInstruction};
 /// For Buyer:
 /// - RegisterBuyer (Initialize)
 /// - BuyToken
-/// - CloseFacts
+/// - DeregisterBuyer
 ///
 #[derive(BorshDeserialize, BorshSerialize, Debug, ShankContext, ShankInstruction)]
 pub enum TokenSaleInstruction {
@@ -187,6 +187,31 @@ pub enum TokenSaleInstruction {
     )]
     #[account(3, name = "system_program", desc = "System_program")]
     RegisterBuyer,
+
+    /// Close a buyer's BuyerFacts
+    ///
+    /// - Closes the [`BuyerFacts`] account
+    /// - Relinquishes rent lamports
+    ///
+    /// For Buyers
+    #[account(
+        0,
+        name = "token_base",
+        desc = "Account (BuyerFacts PDA) holding a buyer's configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
+    )]
+    #[account(
+        1,
+        writable,
+        name = "buyer_facts",
+        desc = "Account (BuyerFacts PDA) holding a buyer's configuration. Seeds ['token_base', `pubkey(sale_authority)`, `pubkey(mint)`]"
+    )]
+    #[account(
+        2,
+        signer,
+        name = "buyer",
+        desc = "Account who owns the BuyerFacts PDA to be assigned a new purchase limit to"
+    )]
+    DeregisterBuyer,
     // /// Buy N amount of Tokens
     // ///
     // /// - Initializes Associated Token Account for Buyer

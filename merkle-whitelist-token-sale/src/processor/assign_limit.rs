@@ -14,10 +14,10 @@ use solana_program::{entrypoint::ProgramResult, program_error::ProgramError, pub
 /// For Token Sale Authority
 ///
 /// Accounts
-/// 1. `[]`         `Token Base` buyer config account, PDA generated offchain
-/// 0. `[WRITE]`    `Buyer Facts` buyer config account, PDA generated offchain
-/// 1. `[]`         `Buyer` account
-/// 2. `[SIGNER]`   `Sale Authority` account
+/// 0. `[]`         `Token Base` buyer config account, PDA generated offchain
+/// 1. `[WRITE]`    `Buyer Facts` buyer config account, PDA generated offchain
+/// 2. `[]`         `Buyer` account
+/// 3. `[SIGNER]`   `Sale Authority` account
 ///
 /// Instruction Data
 /// - new_purchase_limit: u64,

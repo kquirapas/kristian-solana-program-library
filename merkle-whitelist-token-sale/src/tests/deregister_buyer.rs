@@ -2,7 +2,7 @@ use super::utils::TestHelper;
 use crate::*;
 use assert_matches::assert_matches;
 use borsh::BorshSerialize;
-use merkletreers::{tree::MerkleTree, Leaf};
+use merkletreers::tree::MerkleTree;
 use solana_program_test::*;
 use solana_sdk::{
     instruction::{AccountMeta, Instruction},
@@ -14,7 +14,7 @@ use solana_sdk::{
 
 /// Test Happy Path
 #[tokio::test]
-async fn test_close_sale() {
+async fn test_deregister_buyer() {
     let program_id = Pubkey::new_unique();
     let program_test = ProgramTest::new(
         // .so fixture is  retrieved from /target/deploy
@@ -32,8 +32,7 @@ async fn test_close_sale() {
     let vault = Keypair::new();
     let price: u64 = 100000000000;
     let default_purchase_limit: u64 = 100;
-    let new_leaf: Leaf = Keypair::new().pubkey().to_bytes();
-    let whitelist_root = crate::merkle::WhitelistRoot(MerkleTree::new(vec![new_leaf]).root);
+    let whitelist_root = crate::merkle::WhitelistRoot(MerkleTree::new(Vec::new()).root);
 
     // create TokenBase
     let (token_base_pda, _) = TestHelper::initialize_token_base(
@@ -47,24 +46,27 @@ async fn test_close_sale() {
     )
     .await;
 
-    let instruction = crate::instruction::TokenSaleInstruction::CloseSale;
+    let (buyer, buyer_facts_pda, _) =
+        TestHelper::initialize_buyer_facts(token_base_pda, program_id, &mut ctx).await;
+
+    let instruction = crate::instruction::TokenSaleInstruction::DeregisterBuyer;
 
     let mut instruction_data = Vec::new();
     instruction.serialize(&mut instruction_data).unwrap();
 
-    // CloseSale Transaction
+    // DeregisterBuyer Transaction
     let transaction = Transaction::new_signed_with_payer(
         &[Instruction {
             program_id,
             accounts: vec![
-                AccountMeta::new(token_base_pda, false),
-                AccountMeta::new_readonly(mint, false),
-                AccountMeta::new(ctx.payer.pubkey(), true),
+                AccountMeta::new_readonly(token_base_pda, false),
+                AccountMeta::new(buyer_facts_pda, false),
+                AccountMeta::new(buyer.pubkey(), true),
             ],
             data: instruction_data.clone(),
         }],
         Some(&ctx.payer.pubkey()),
-        &[&ctx.payer.insecure_clone()],
+        &[&ctx.payer.insecure_clone(), &buyer.insecure_clone()],
         ctx.last_blockhash,
     );
 
@@ -74,14 +76,14 @@ async fn test_close_sale() {
         .unwrap();
 
     // confirm state
-    let token_base = ctx
+    let buyer_facts = ctx
         .banks_client
-        .get_account_data_with_borsh::<state::TokenBase>(token_base_pda)
+        .get_account_data_with_borsh::<state::BuyerFacts>(buyer_facts_pda)
         .await;
 
     // must be account not found
     assert_matches!(
-        token_base,
+        buyer_facts,
         Err(BanksClientError::ClientError("Account not found"))
     );
 }

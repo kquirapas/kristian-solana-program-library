@@ -20,6 +20,9 @@ use assign_limit::*;
 pub mod register_buyer;
 use register_buyer::*;
 
+pub mod deregister_buyer;
+use deregister_buyer::*;
+
 // pub mod buy_token;
 // use buy_token::*;
 
@@ -85,6 +88,10 @@ impl<'a> Processor {
 
             TokenSaleInstruction::RegisterBuyer => {
                 process_register_buyer(program_id, RegisterBuyerAccounts::context(accounts)?)?;
+            }
+
+            TokenSaleInstruction::DeregisterBuyer => {
+                process_deregister_buyer(program_id, DeregisterBuyerAccounts::context(accounts)?)?;
             }
         }
 
