@@ -4,7 +4,7 @@ use crate::pda::BuyerFactsPDA;
 use crate::state::BuyerFacts;
 use crate::{instruction::accounts::*, require};
 use borsh::{BorshDeserialize, BorshSerialize};
-use solana_program::{entrypoint::ProgramResult, msg, program_error::ProgramError, pubkey::Pubkey};
+use solana_program::{entrypoint::ProgramResult, program_error::ProgramError, pubkey::Pubkey};
 
 /// Assign a user's purchase limit
 ///

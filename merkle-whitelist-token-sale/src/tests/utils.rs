@@ -13,6 +13,7 @@ use {
         signature::Signer,
         system_instruction,
         system_program::ID as SYSTEM_PROGRAM_ID,
+        system_transaction,
         transaction::Transaction,
     },
 };
@@ -103,13 +104,25 @@ impl TestHelper {
 
     pub async fn initialize_buyer_facts(
         token_base: Pubkey,
-        buyer: Pubkey,
         program_id: Pubkey,
         ctx: &mut ProgramTestContext,
-    ) -> (Pubkey, u8) {
+    ) -> (Keypair, Pubkey, u8) {
+        // create buyer
+        let buyer = Keypair::new();
+        // load up buyer with lamports
+        ctx.banks_client
+            .process_transaction(system_transaction::transfer(
+                &ctx.payer,
+                &buyer.pubkey(),
+                1000000000000,
+                ctx.last_blockhash,
+            ))
+            .await
+            .unwrap();
+
         // create buyer_facts
         let (buyer_facts_pda, buyer_facts_canonical_bump) =
-            pda::BuyerFactsPDA::find_pda(&program_id, &token_base, &buyer);
+            pda::BuyerFactsPDA::find_pda(&program_id, &token_base, &buyer.pubkey());
 
         let instruction = crate::instruction::TokenSaleInstruction::RegisterBuyer;
 
@@ -122,13 +135,14 @@ impl TestHelper {
                 accounts: vec![
                     AccountMeta::new_readonly(token_base, false),
                     AccountMeta::new(buyer_facts_pda, false),
-                    AccountMeta::new(ctx.payer.pubkey(), true),
+                    AccountMeta::new(buyer.pubkey(), true),
                     AccountMeta::new_readonly(SYSTEM_PROGRAM_ID, false),
                 ],
                 data: instruction_data,
             }],
             Some(&ctx.payer.pubkey()),
-            &[&ctx.payer.insecure_clone()],
+            // only need payer here because payer is paying
+            &[&ctx.payer.insecure_clone(), &buyer.insecure_clone()],
             ctx.last_blockhash,
         );
 
@@ -137,6 +151,6 @@ impl TestHelper {
             .await
             .unwrap();
 
-        (buyer_facts_pda, buyer_facts_canonical_bump)
+        (buyer, buyer_facts_pda, buyer_facts_canonical_bump)
     }
 }

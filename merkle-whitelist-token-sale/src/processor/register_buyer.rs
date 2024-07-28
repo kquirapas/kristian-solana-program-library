@@ -59,7 +59,7 @@ pub fn process_register_buyer(
     );
     drop(buyer_facts_data);
 
-    // - token_base seeds must be ["token_base", pubkey(mint)]
+    // - seeds must be ["buyer_facts", pubkey(token_base), pubkey(buyer)]
     let (buyer_facts_pda, buyer_facts_canonical_bump) = BuyerFactsPDA::find_pda(
         program_id,
         ctx.accounts.token_base.key,

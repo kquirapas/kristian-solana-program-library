@@ -42,13 +42,8 @@ async fn test_register_buyer() {
     )
     .await;
 
-    let (buyer_facts_pda, buyer_facts_canonical_bump) = TestHelper::initialize_buyer_facts(
-        token_base_pda,
-        ctx.payer.pubkey(),
-        program_id,
-        &mut ctx,
-    )
-    .await;
+    let (_, buyer_facts_pda, buyer_facts_canonical_bump) =
+        TestHelper::initialize_buyer_facts(token_base_pda, program_id, &mut ctx).await;
 
     // confirm state
     let buyer_facts = ctx

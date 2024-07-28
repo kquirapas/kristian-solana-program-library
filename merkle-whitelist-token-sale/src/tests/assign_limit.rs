@@ -11,7 +11,8 @@ use solana_sdk::{
     transaction::Transaction,
 };
 
-/// Test Happy Path #[tokio::test]
+/// Test Happy Path
+#[tokio::test]
 async fn test_assign_limit() {
     let program_id = Pubkey::new_unique();
     let program_test = ProgramTest::new(
@@ -49,17 +50,9 @@ async fn test_assign_limit() {
     // PDA inequality
     //
     // But it works with banks_client's `payer` pubkey
-    //
-    // let buyer = Keypair::new();
 
-    let (buyer_facts_pda, _) = TestHelper::initialize_buyer_facts(
-        token_base_pda,
-        // buyer.pubkey(),
-        ctx.payer.pubkey(),
-        program_id,
-        &mut ctx,
-    )
-    .await;
+    let (buyer, buyer_facts_pda, _) =
+        TestHelper::initialize_buyer_facts(token_base_pda, program_id, &mut ctx).await;
 
     let new_purchase_limit: u64 = 143;
     let instruction = crate::instruction::TokenSaleInstruction::AssignLimit { new_purchase_limit };
@@ -67,13 +60,14 @@ async fn test_assign_limit() {
     let mut instruction_data = Vec::new();
     instruction.serialize(&mut instruction_data).unwrap();
 
+    // AssignLimit Transaction
     let transaction = Transaction::new_signed_with_payer(
         &[Instruction {
             program_id,
             accounts: vec![
                 AccountMeta::new_readonly(token_base_pda, false),
                 AccountMeta::new(buyer_facts_pda, false),
-                AccountMeta::new_readonly(ctx.payer.pubkey(), false),
+                AccountMeta::new_readonly(buyer.pubkey(), false),
                 AccountMeta::new(ctx.payer.pubkey(), true),
             ],
             data: instruction_data.clone(),
