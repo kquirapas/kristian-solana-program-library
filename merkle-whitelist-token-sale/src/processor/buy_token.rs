@@ -50,7 +50,7 @@ pub fn process_buy_token(
     // - owner is token_sale (this) program
     // - correct allocation length (TokenBase::LEN)
     // - account is initialized
-    // - token_base seeds must be ["token_base", pubkey(mint)]
+    // - token_base seeds must be ["token_base", pubkey(sale_authority), pubkey(mint)]
 
     // - owner is token_sale (this) program
     require!(
